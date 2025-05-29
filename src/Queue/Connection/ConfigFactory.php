@@ -18,17 +18,21 @@ class ConfigFactory
     {
         return tap(new AMQPConnectionConfig, function (AMQPConnectionConfig $connectionConfig) use ($config) {
             // Set the connection to a Lazy by default
-            $connectionConfig->setIsLazy(! in_array(
-                Arr::get($config, 'lazy') ?? true,
-                [false, 0, '0', 'false', 'no'],
-                true)
+            $connectionConfig->setIsLazy(
+                ! in_array(
+                    Arr::get($config, 'lazy') ?? true,
+                    [false, 0, '0', 'false', 'no'],
+                    true
+                )
             );
 
             // Set the connection to unsecure by default
-            $connectionConfig->setIsSecure(in_array(
-                Arr::get($config, 'secure'),
-                [true, 1, '1', 'true', 'yes'],
-                true)
+            $connectionConfig->setIsSecure(
+                in_array(
+                    Arr::get($config, 'secure'),
+                    [true, 1, '1', 'true', 'yes'],
+                    true
+                )
             );
 
             if ($connectionConfig->isSecure()) {
@@ -38,6 +42,7 @@ class ConfigFactory
             self::getHostFromConfig($connectionConfig, $config);
             self::getHeartbeatFromConfig($connectionConfig, $config);
             self::getNetworkProtocolFromConfig($connectionConfig, $config);
+            self::getReadWriteTimeoutFromConfig($connectionConfig, $config);
         });
     }
 
@@ -97,6 +102,26 @@ class ConfigFactory
     {
         if ($networkProtocol = Arr::get($config, 'network_protocol')) {
             $connectionConfig->setNetworkProtocol($networkProtocol);
+        }
+    }
+
+    protected static function getReadWriteTimeoutFromConfig(AMQPConnectionConfig $connectionConfig, array $config): void
+    {
+        $readTimeout = Arr::get($config, self::CONFIG_OPTIONS.'.read_timeout');
+        $writeTimeout = Arr::get($config, self::CONFIG_OPTIONS.'.write_timeout');
+
+        if (is_numeric($readTimeout)) {
+            $timeoutValue = (int) $readTimeout;
+            if ($timeoutValue > 0) {
+                $connectionConfig->setReadTimeout($timeoutValue);
+            }
+        }
+
+        if (is_numeric($writeTimeout)) {
+            $timeoutValue = (int) $writeTimeout;
+            if ($timeoutValue > 0) {
+                $connectionConfig->setWriteTimeout($timeoutValue);
+            }
         }
     }
 }
