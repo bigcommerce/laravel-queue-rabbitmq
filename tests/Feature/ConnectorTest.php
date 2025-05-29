@@ -168,6 +168,8 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
                     'verify_peer' => false,
                     'passphrase' => null,
                 ],
+                'read_timeout' => 10,
+                'write_timeout' => 15,
             ],
 
             'worker' => env('RABBITMQ_WORKER', 'default'),
@@ -180,8 +182,10 @@ class ConnectorTest extends \VladimirYuldashev\LaravelQueueRabbitMQ\Tests\TestCa
         $connection = $queue->connection('rabbitmq');
         $this->assertInstanceOf(RabbitMQQueue::class, $connection);
         $this->assertInstanceOf(AMQPSSLConnection::class, $connection->getConnection());
-        /** @var AMQPConnectionConfig */
+        /** @var AMQPConnectionConfig $config */
         $config = $connection->getConnection()->getConfig();
         $this->assertFalse($config->getSslVerify());
+        $this->assertEquals(10, $config->getReadTimeout());
+        $this->assertEquals(15, $config->getWriteTimeout());
     }
 }
