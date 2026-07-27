@@ -62,14 +62,14 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
     /**
      * Holds the Configuration
      */
-    protected QueueConfig $config;
+    protected QueueConfig $rabbitMQConfig;
 
     /**
      * RabbitMQQueue constructor.
      */
     public function __construct(QueueConfig $config)
     {
-        $this->config = $config;
+        $this->rabbitMQConfig = $config;
         $this->dispatchAfterCommit = $config->isDispatchAfterCommit();
     }
 
@@ -737,7 +737,7 @@ class RabbitMQQueue extends Queue implements QueueContract, RabbitMQQueueContrac
 
     protected function getConfig(): QueueConfig
     {
-        return $this->config;
+        return $this->rabbitMQConfig;
     }
 
     /**
